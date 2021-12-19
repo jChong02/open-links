@@ -7,6 +7,9 @@ from functools import partial
 #dict used to hold search term - url pairs
 searchURLS = {}
 
+#default or incognito search
+flag_incognito = False
+
 #regex to identify if website or search term
 regex = re.compile(
             r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
@@ -35,7 +38,7 @@ def handle_delete(query):
     deleted = searchURLS.pop(query)
     update_queries()
     
-
+#refreshes the list of searches
 def update_queries():
     clearEmptyError()
     
@@ -62,7 +65,10 @@ def update_queries():
     
 
 def execute_search():
-    chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
+    if flag_incognito:
+        chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s --incognito'
+    else:
+        chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
     
     clearEmptyError() 
     
@@ -74,11 +80,22 @@ def execute_search():
             webbrowser.get(chrome_path).open_new_tab(url)        
         
     
-    
+#clears the empty search list message    
 def clearEmptyError():
     for widget in frm_execute.winfo_children() or searchURLS:
         if isinstance(widget, tk.Label):
-            widget.destroy()       
+            widget.destroy()
+
+
+#user can decide if they want to execute the search in incognito or default mode
+def toggleIncognito():
+    global flag_incognito
+    if not flag_incognito:
+        flag_incognito = True
+        btn_incognito.config(text="Incognito: " + str(flag_incognito))
+    else:
+        flag_incognito = False
+        btn_incognito.config(text="Incognito: " + str(flag_incognito))
 
 
 window = tk.Tk()
@@ -95,14 +112,17 @@ frm_execute = tk.Frame(master=window)
 lbl_search = tk.Label(master=frm_search, text="Enter a search term or a link:")
 lbl_search.grid(row=0, column=0)
 
+btn_incognito = tk.Button(master=frm_search, text="Incognito: " + str(flag_incognito), command=toggleIncognito)
+btn_incognito.grid(row=1, column=0)
+
 
 ent_search = tk.Entry(master=frm_search)
 ent_search.bind('<Return>', handle_add)
-ent_search.grid(row=1, column=0)
+ent_search.grid(row=2, column=0, pady=5)
 
 
 btn_add = tk.Button(master=frm_search, text="Add")
-btn_add.grid(row=1, column=1)
+btn_add.grid(row=2, column=1)
 btn_add.bind("<Button-1>", handle_add)
 
 btn_executeSearch = tk.Button(master=frm_execute, text="Execute Search",command=execute_search)
