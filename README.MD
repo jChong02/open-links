@@ -1,0 +1,2 @@
+This is a basic program that allows users to input multiple search terms and have them all executed at once in Google Chrome.
+Regex is used to identify if the user input is a search term to be Googled or a direct URL to be opened.
